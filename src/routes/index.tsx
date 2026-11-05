@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Plus, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/closet/AppShell";
 import { DemoBadge, GarmentCard } from "@/components/closet/ui";
-import { garments, outfits } from "@/lib/demo-data";
+import { garments } from "@/lib/demo-data";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -17,12 +17,6 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const stats = [
-    { label: "Total de prendas", value: garments.length },
-    { label: "Outfits creados", value: outfits.length },
-    { label: "Categorías utilizadas", value: new Set(garments.map((g) => g.category)).size },
-    { label: "Categoría principal", value: "Superiores" },
-  ];
   return (
     <AppShell>
       <section className="mb-10">
@@ -31,15 +25,6 @@ function Index() {
         <p className="mt-3 max-w-xl text-muted-foreground">
           Organiza tu guardarropa, descubre nuevas combinaciones y aprovecha cada prenda.
         </p>
-      </section>
-
-      <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        {stats.map((s) => (
-          <div key={s.label} className="rounded-2xl bg-card p-5 shadow-soft">
-            <p className="text-xs text-muted-foreground">{s.label}</p>
-            <p className="mt-3 font-display text-2xl text-foreground sm:text-3xl">{s.value}</p>
-          </div>
-        ))}
       </section>
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2">
