@@ -1,5 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Plus, Sparkles } from "lucide-react";
+import { AddGarmentDialog } from "@/components/closet/AddGarmentDialog";
 import { AppShell } from "@/components/closet/AppShell";
 import { DemoBadge, GarmentCard } from "@/components/closet/ui";
 import { garments } from "@/lib/demo-data";
@@ -28,7 +29,11 @@ function Index() {
       </section>
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2">
-        <QuickAction to="/wardrobe" icon={<Plus className="h-5 w-5" />} title="Agregar prenda" text="Suma una nueva pieza a tu armario." />
+        <AddGarmentDialog
+          trigger={
+            <QuickAction icon={<Plus className="h-5 w-5" />} title="Agregar prenda" text="Suma una nueva pieza a tu armario." />
+          }
+        />
         <QuickAction to="/outfits" icon={<Sparkles className="h-5 w-5" />} title="Crear outfit" text="Combina prendas en un nuevo look." />
       </section>
 
@@ -49,15 +54,26 @@ function Index() {
   );
 }
 
-function QuickAction({ to, icon, title, text }: { to: "/wardrobe" | "/outfits"; icon: React.ReactNode; title: string; text: string }) {
-  return (
-    <Link to={to} className="group flex items-center gap-4 rounded-2xl bg-sage-soft p-5 transition hover:shadow-soft">
+function QuickAction({ to, icon, title, text }: { to?: "/wardrobe" | "/outfits"; icon: React.ReactNode; title: string; text: string }) {
+  const className = "group flex w-full items-center gap-4 rounded-2xl bg-sage-soft p-5 text-left transition hover:shadow-soft";
+  const content = (
+    <>
       <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">{icon}</span>
       <span className="flex-1">
         <span className="block font-medium text-foreground">{title}</span>
         <span className="block text-sm text-muted-foreground">{text}</span>
       </span>
       <ArrowRight className="h-5 w-5 text-primary transition group-hover:translate-x-1" />
+    </>
+  );
+
+  return to ? (
+    <Link to={to} className={className}>
+      {content}
     </Link>
+  ) : (
+    <button type="button" className={className}>
+      {content}
+    </button>
   );
 }

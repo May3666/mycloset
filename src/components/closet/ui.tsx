@@ -133,9 +133,9 @@ function EmptyState({ icon: Icon, title, message, action }: { icon: LucideIcon; 
   );
 }
 
-export const EmptyGarments = () => (
+export const EmptyGarments = ({ action }: { action?: ReactNode }) => (
   <EmptyState icon={Shirt} title="Tu armario está vacío" message="Agrega tu primera prenda y empieza a construir tu armario digital."
-    action={<PrimaryButton><Plus className="h-4 w-4" />Agregar prenda</PrimaryButton>} />
+    action={action ?? <PrimaryButton><Plus className="h-4 w-4" />Agregar prenda</PrimaryButton>} />
 );
 export const EmptyOutfits = () => (
   <EmptyState icon={Sparkles} title="Aún no hay outfits" message="Combina tus prendas favoritas y guarda tu primer look."
