@@ -1,4 +1,4 @@
-import { MoreHorizontal, Search, Shirt, Sparkles, SearchX, Plus, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, MoreHorizontal, Search, Shirt, Sparkles, SearchX, Plus, type LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { getGarment, type Garment, type Outfit } from "@/lib/demo-data";
 
@@ -60,30 +60,44 @@ export function GarmentCard({ garment }: { garment: Garment }) {
   );
 }
 
-export function OutfitCard({ outfit }: { outfit: Outfit }) {
+export function OutfitCard({ outfit, onClick }: { outfit: Outfit; onClick: () => void }) {
   const items = outfit.garmentIds.map(getGarment);
   const cells = items.slice(0, 4);
   return (
     <article className="overflow-hidden rounded-2xl bg-card p-3 shadow-soft transition hover:shadow-lift">
-      <div className="grid aspect-square grid-cols-2 gap-2">
-        {cells.map((g, i) => (
-          <div
-            key={g.id}
-            className={`overflow-hidden rounded-xl bg-secondary ${cells.length === 3 && i === 0 ? "row-span-2" : ""}`}
-          >
-            <img src={g.image} alt={g.name} loading="lazy" className="h-full w-full object-cover" />
-          </div>
-        ))}
-      </div>
-      <div className="flex items-start justify-between gap-2 px-1 pb-1 pt-4">
-        <div>
-          <h3 className="text-lg text-foreground">{outfit.name}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {outfit.occasion} · {items.length} prendas
-          </p>
+      <button
+        type="button"
+        onClick={onClick}
+        aria-label={`Ver outfit ${outfit.name}`}
+        className="group block w-full rounded-xl text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      >
+        <div className="grid aspect-square grid-cols-2 gap-2">
+          {cells.map((g, i) => (
+            <div
+              key={g.id}
+              className={`overflow-hidden rounded-xl bg-secondary ${cells.length === 3 && i === 0 ? "row-span-2" : ""}`}
+            >
+              <img
+                src={g.image}
+                alt={g.name}
+                loading="lazy"
+                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+              />
+            </div>
+          ))}
         </div>
-        <OptionsButton label={outfit.name} />
-      </div>
+        <div className="flex items-start justify-between gap-2 px-1 pb-1 pt-4">
+          <div>
+            <h3 className="text-lg text-foreground">{outfit.name}</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {outfit.occasion} · {items.length} prendas
+            </p>
+          </div>
+          <span className="rounded-full p-2 text-muted-foreground transition group-hover:bg-sage-soft group-hover:text-primary">
+            <ArrowUpRight className="h-4 w-4" />
+          </span>
+        </div>
+      </button>
     </article>
   );
 }
