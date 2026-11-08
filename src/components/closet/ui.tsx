@@ -1,6 +1,7 @@
 import { ArrowUpRight, MoreHorizontal, Search, Shirt, Sparkles, SearchX, Plus, type LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { getGarment, type Garment, type Outfit } from "@/lib/demo-data";
+import { EditGarmentDialog } from "@/components/closet/EditGarmentDialog";
+import { getOutfitGarments, type Garment, type Outfit } from "@/lib/demo-data";
 
 export function PrimaryButton({ children, className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
@@ -16,13 +17,12 @@ export function PrimaryButton({ children, className = "", ...props }: ButtonHTML
 
 export function OptionsButton({ label }: { label: string }) {
   return (
-    <button
-      type="button"
+    <span
       aria-label={`Opciones de ${label}`}
-      className="rounded-full p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
+      className="rounded-full p-2 text-muted-foreground transition group-hover:bg-muted group-hover:text-foreground"
     >
       <MoreHorizontal className="h-4 w-4" />
-    </button>
+    </span>
   );
 }
 
@@ -36,27 +36,36 @@ export function DemoBadge() {
 
 export function GarmentCard({ garment }: { garment: Garment }) {
   return (
-    <article className="group overflow-hidden rounded-2xl bg-card shadow-soft transition hover:shadow-lift">
-      <div className="aspect-[4/5] overflow-hidden bg-secondary">
-        <img
-          src={garment.image}
-          alt={garment.name}
-          loading="lazy"
-          width={768}
-          height={960}
-          className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]"
-        />
-      </div>
-      <div className="flex items-start justify-between gap-2 p-4">
-        <div>
-          <h3 className="font-sans text-sm font-medium text-foreground">{garment.name}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {garment.category}{garment.color ? ` · ${garment.color}` : ""}
-          </p>
-        </div>
-        <OptionsButton label={garment.name} />
-      </div>
-    </article>
+    <EditGarmentDialog
+      garment={garment}
+      trigger={
+        <button
+          type="button"
+          aria-label={`Editar ${garment.name}`}
+          className="group block w-full overflow-hidden rounded-2xl bg-card text-left shadow-soft transition hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          <div className="aspect-[4/5] overflow-hidden bg-secondary">
+            <img
+              src={garment.image}
+              alt={garment.name}
+              loading="lazy"
+              width={768}
+              height={960}
+              className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]"
+            />
+          </div>
+          <div className="flex items-start justify-between gap-2 p-4">
+            <div>
+              <h3 className="font-sans text-sm font-medium text-foreground">{garment.name}</h3>
+              <p className="mt-1 text-xs text-muted-foreground">
+                {garment.category}{garment.color ? ` · ${garment.color}` : ""}
+              </p>
+            </div>
+            <OptionsButton label={garment.name} />
+          </div>
+        </button>
+      }
+    />
   );
 }
 
@@ -69,7 +78,7 @@ export function OutfitCard({
   garments: Garment[];
   onClick: () => void;
 }) {
-  const items = outfit.garmentIds.map((id) => getGarment(id, garments));
+  const items = getOutfitGarments(outfit, garments);
   const cells = items.slice(0, 4);
   return (
     <article className="overflow-hidden rounded-2xl bg-card p-3 shadow-soft transition hover:shadow-lift">
