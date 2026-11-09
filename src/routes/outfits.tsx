@@ -3,7 +3,7 @@ import { Plus } from "lucide-react";
 import { useState } from "react";
 import { AppShell, PageHeader } from "@/components/closet/AppShell";
 import { OutfitDialog } from "@/components/closet/OutfitDialog";
-import { DemoBadge, EmptyOutfits, OutfitCard, PrimaryButton } from "@/components/closet/ui";
+import { EmptyOutfits, OutfitCard, PrimaryButton } from "@/components/closet/ui";
 import { outfits, type Outfit } from "@/lib/demo-data";
 import { useGarments } from "@/lib/garment-store";
 
@@ -30,7 +30,6 @@ function Outfits() {
         subtitle="Crea combinaciones únicas con las prendas de tu armario."
         action={<PrimaryButton><Plus className="h-4 w-4" />Crear outfit</PrimaryButton>}
       />
-      <div className="mb-4"><DemoBadge /></div>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {outfits.map((o) => (
           <OutfitCard key={o.id} outfit={o} garments={garments} onClick={() => setSelectedOutfit(o)} />

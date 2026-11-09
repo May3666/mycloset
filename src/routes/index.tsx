@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Plus, Sparkles } from "lucide-react";
 import { AddGarmentDialog } from "@/components/closet/AddGarmentDialog";
 import { AppShell } from "@/components/closet/AppShell";
-import { DemoBadge, GarmentCard } from "@/components/closet/ui";
+import { GarmentCard } from "@/components/closet/ui";
 import { useGarments } from "@/lib/garment-store";
 
 export const Route = createFileRoute("/")({
@@ -23,8 +23,7 @@ function Index() {
   return (
     <AppShell>
       <section className="mb-10">
-        <DemoBadge />
-        <h1 className="mt-4 text-4xl leading-tight sm:text-5xl">Tu estilo, a tu manera.</h1>
+        <h1 className="text-4xl leading-tight sm:text-5xl">Tu estilo, a tu manera.</h1>
         <p className="mt-3 max-w-xl text-muted-foreground">
           Organiza tu guardarropa, descubre nuevas combinaciones y aprovecha cada prenda.
         </p>

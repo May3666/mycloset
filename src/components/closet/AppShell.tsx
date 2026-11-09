@@ -36,9 +36,6 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <div className="mt-auto rounded-2xl bg-secondary p-4 text-xs text-muted-foreground">
-          Versión de diseño · datos demostrativos
-        </div>
       </aside>
 
       {/* Barra superior móvil */}

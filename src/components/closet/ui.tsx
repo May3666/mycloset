@@ -15,14 +15,6 @@ export function PrimaryButton({ children, className = "", ...props }: ButtonHTML
   );
 }
 
-export function DemoBadge() {
-  return (
-    <span className="inline-flex items-center rounded-full bg-sage-soft px-3 py-1 text-xs font-medium text-primary">
-      Datos demostrativos
-    </span>
-  );
-}
-
 export function GarmentCard({ garment }: { garment: Garment }) {
   return (
     <EditGarmentDialog
