@@ -1,6 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, Plus, Sparkles } from "lucide-react";
-import { AddGarmentDialog } from "@/components/closet/AddGarmentDialog";
 import { AppShell } from "@/components/closet/AppShell";
 import { GarmentCard } from "@/components/closet/ui";
 import { useGarments } from "@/lib/garment-store";
@@ -30,10 +29,11 @@ function Index() {
       </section>
 
       <section className="mt-6 grid gap-4 sm:grid-cols-2">
-        <AddGarmentDialog
-          trigger={
-            <QuickAction icon={<Plus className="h-5 w-5" />} title="Agregar prenda" text="Suma una nueva pieza a tu armario." />
-          }
+        <QuickAction
+          to="/wardrobe"
+          icon={<Plus className="h-5 w-5" />}
+          title="Agregar prenda"
+          text="Suma una nueva pieza a tu armario."
         />
         <QuickAction to="/outfits" icon={<Sparkles className="h-5 w-5" />} title="Crear outfit" text="Combina prendas en un nuevo look." />
       </section>
