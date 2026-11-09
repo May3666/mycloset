@@ -25,10 +25,23 @@ export const Route = createFileRoute("/api/remove-background")({
           return Response.json({ detail: "Falta el archivo de imagen." }, { status: 400 });
         }
 
-        const serviceUrl = process.env.BACKGROUND_REMOVAL_URL ?? "http://localhost:7000";
-        const targetUrl = new URL("/api/remove-background", serviceUrl);
-
         try {
+          const environment = typeof process === "undefined" ? undefined : process.env;
+          const serviceUrl =
+            environment?.BACKGROUND_REMOVAL_URL ??
+            (environment?.VERCEL ? undefined : "http://localhost:7000");
+          if (!serviceUrl) {
+            console.error("The BACKGROUND_REMOVAL_URL service binding is missing.");
+            return Response.json(
+              {
+                detail:
+                  "El servicio de eliminación de fondo no está configurado en este despliegue.",
+              },
+              { status: 503 },
+            );
+          }
+
+          const targetUrl = new URL("/api/remove-background", serviceUrl);
           const upstream = await fetch(targetUrl, {
             method: "POST",
             body,
@@ -38,7 +51,8 @@ export const Route = createFileRoute("/api/remove-background")({
           const contentType = upstream.headers.get("content-type");
           if (contentType) headers.set("content-type", contentType);
           return new Response(upstream.body, { status: upstream.status, headers });
-        } catch {
+        } catch (error) {
+          console.error("Failed to proxy image to background-removal service:", error);
           return Response.json(
             { detail: "El servicio de eliminación de fondo no está disponible." },
             { status: 502 },
