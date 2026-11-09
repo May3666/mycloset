@@ -172,9 +172,9 @@ export const EmptyGarments = ({ action }: { action?: ReactNode }) => (
   <EmptyState icon={Shirt} title="Tu armario está vacío" message="Agrega tu primera prenda y empieza a construir tu armario digital."
     action={action ?? <PrimaryButton><Plus className="h-4 w-4" />Agregar prenda</PrimaryButton>} />
 );
-export const EmptyOutfits = () => (
+export const EmptyOutfits = ({ onCreate }: { onCreate?: () => void }) => (
   <EmptyState icon={Sparkles} title="Aún no hay outfits" message="Combina tus prendas favoritas y guarda tu primer look."
-    action={<PrimaryButton><Plus className="h-4 w-4" />Crear outfit</PrimaryButton>} />
+    action={<PrimaryButton onClick={onCreate}><Plus className="h-4 w-4" />Crear outfit</PrimaryButton>} />
 );
 export const EmptySearch = ({ onClear }: { onClear?: () => void }) => (
   <EmptyState icon={SearchX} title="Sin resultados" message="No encontramos prendas con esos filtros. Prueba con otra búsqueda."

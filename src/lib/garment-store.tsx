@@ -1,6 +1,6 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
 
-import { garments as demoGarments, type Garment } from "@/lib/demo-data";
+import { garments as demoGarments, outfits as demoOutfits, type Garment, type Outfit } from "@/lib/demo-data";
 
 type GarmentDetails = Omit<Garment, "image" | "brand"> & { brand?: string };
 type NewGarment = GarmentDetails;
@@ -8,16 +8,24 @@ type GarmentUpdate = Omit<GarmentDetails, "id">;
 type StoredGarment = GarmentDetails & { imageBlob?: Blob };
 type DeletedGarment = { id: string; deleted: true };
 type StoredRecord = StoredGarment | DeletedGarment;
+type StoredOutfit = Outfit;
+type DeletedOutfit = { id: string; deleted: true };
+type OutfitRecord = StoredOutfit | DeletedOutfit;
 type GarmentStoreValue = {
   garments: Garment[];
+  outfits: Outfit[];
   addGarment: (garment: NewGarment, image: Blob) => Promise<void>;
   updateGarment: (id: string, garment: GarmentUpdate, image?: Blob) => Promise<void>;
   deleteGarment: (id: string) => Promise<void>;
+  addOutfit: (outfit: Outfit) => Promise<void>;
+  updateOutfit: (outfit: Outfit) => Promise<void>;
+  deleteOutfit: (id: string) => Promise<void>;
 };
 
 const DATABASE_NAME = "mycloset";
-const DATABASE_VERSION = 1;
+const DATABASE_VERSION = 2;
 const GARMENT_STORE = "garments";
+const OUTFIT_STORE = "outfits";
 
 const GarmentStoreContext = createContext<GarmentStoreValue | null>(null);
 
@@ -27,6 +35,9 @@ function openDatabase() {
     request.onupgradeneeded = () => {
       if (!request.result.objectStoreNames.contains(GARMENT_STORE)) {
         request.result.createObjectStore(GARMENT_STORE, { keyPath: "id" });
+      }
+      if (!request.result.objectStoreNames.contains(OUTFIT_STORE)) {
+        request.result.createObjectStore(OUTFIT_STORE, { keyPath: "id" });
       }
     };
     request.onsuccess = () => resolve(request.result);
@@ -82,6 +93,37 @@ async function deleteRecord(id: string) {
   });
 }
 
+async function readSavedOutfits() {
+  const database = await openDatabase();
+  return new Promise<OutfitRecord[]>((resolve, reject) => {
+    const request = database.transaction(OUTFIT_STORE, "readonly").objectStore(OUTFIT_STORE).getAll();
+    request.onsuccess = () => resolve(request.result as OutfitRecord[]);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function writeOutfitRecord(record: OutfitRecord) {
+  const database = await openDatabase();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = database.transaction(OUTFIT_STORE, "readwrite");
+    transaction.objectStore(OUTFIT_STORE).put(record);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+}
+
+async function deleteOutfitRecord(id: string) {
+  const database = await openDatabase();
+  return new Promise<void>((resolve, reject) => {
+    const transaction = database.transaction(OUTFIT_STORE, "readwrite");
+    transaction.objectStore(OUTFIT_STORE).delete(id);
+    transaction.oncomplete = () => resolve();
+    transaction.onerror = () => reject(transaction.error);
+    transaction.onabort = () => reject(transaction.error);
+  });
+}
+
 function isDeletedRecord(record: StoredRecord): record is DeletedGarment {
   return "deleted" in record && record.deleted;
 }
@@ -125,8 +167,25 @@ function makeGarmentList(records: StoredRecord[]) {
   return { garments: [...demos, ...added], urls };
 }
 
+function isDeletedOutfit(record: OutfitRecord): record is DeletedOutfit {
+  return "deleted" in record && record.deleted;
+}
+
+function makeOutfitList(records: OutfitRecord[]) {
+  const deletedIds = new Set(records.filter(isDeletedOutfit).map((record) => record.id));
+  const saved = records.filter((record): record is StoredOutfit => !isDeletedOutfit(record));
+  const savedById = new Map(saved.map((record) => [record.id, record]));
+  const demoIds = new Set(demoOutfits.map((outfit) => outfit.id));
+  const demos = demoOutfits
+    .filter((outfit) => !deletedIds.has(outfit.id))
+    .map((outfit) => ({ ...outfit, ...savedById.get(outfit.id) }));
+  const added = saved.filter((outfit) => !demoIds.has(outfit.id));
+  return [...demos, ...added];
+}
+
 export function GarmentStoreProvider({ children }: { children: ReactNode }) {
   const [garments, setGarments] = useState<Garment[]>(demoGarments);
+  const [outfits, setOutfits] = useState<Outfit[]>(demoOutfits);
   const garmentsRef = useRef(garments);
   const objectUrls = useRef<string[]>([]);
   garmentsRef.current = garments;
@@ -139,16 +198,20 @@ export function GarmentStoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
-    readSavedGarments()
-      .then((records) => {
-        const result = makeGarmentList(records);
+    Promise.all([readSavedGarments(), readSavedOutfits()])
+      .then(([garmentRecords, outfitRecords]) => {
+        const result = makeGarmentList(garmentRecords);
         if (active) {
           objectUrls.current = result.urls;
           setGarments(result.garments);
+          setOutfits(makeOutfitList(outfitRecords));
         } else result.urls.forEach(URL.revokeObjectURL);
       })
       .catch(() => {
-        if (active) setGarments(demoGarments);
+        if (active) {
+          setGarments(demoGarments);
+          setOutfits(demoOutfits);
+        }
       });
 
     return () => {
@@ -187,8 +250,36 @@ export function GarmentStoreProvider({ children }: { children: ReactNode }) {
     setGarments((current) => current.filter((garment) => garment.id !== id));
   };
 
+  const addOutfit = async (outfit: Outfit) => {
+    await writeOutfitRecord(outfit);
+    setOutfits((current) => [...current.filter((item) => item.id !== outfit.id), outfit]);
+  };
+
+  const updateOutfit = async (outfit: Outfit) => {
+    await writeOutfitRecord(outfit);
+    setOutfits((current) => current.map((item) => (item.id === outfit.id ? outfit : item)));
+  };
+
+  const deleteOutfit = async (id: string) => {
+    if (demoOutfits.some((outfit) => outfit.id === id)) {
+      await writeOutfitRecord({ id, deleted: true });
+    } else {
+      await deleteOutfitRecord(id);
+    }
+    setOutfits((current) => current.filter((outfit) => outfit.id !== id));
+  };
+
   return (
-    <GarmentStoreContext.Provider value={{ garments, addGarment, updateGarment, deleteGarment }}>
+    <GarmentStoreContext.Provider value={{
+      garments,
+      outfits,
+      addGarment,
+      updateGarment,
+      deleteGarment,
+      addOutfit,
+      updateOutfit,
+      deleteOutfit,
+    }}>
       {children}
     </GarmentStoreContext.Provider>
   );

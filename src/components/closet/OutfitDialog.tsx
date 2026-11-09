@@ -1,4 +1,4 @@
-import { Download, LoaderCircle } from "lucide-react";
+import { Download, LoaderCircle, Pencil, Trash2 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState, type RefObject } from "react";
 
 import { PrimaryButton } from "@/components/closet/ui";
@@ -9,6 +9,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { getOutfitGarments, type Garment, type Outfit } from "@/lib/demo-data";
 
 const CANVAS_WIDTH = 1200;
@@ -222,19 +232,26 @@ export function OutfitDialog({
   outfit,
   garments,
   onClose,
+  onEdit,
+  onDelete,
 }: {
   outfit: Outfit | null;
   garments: Garment[];
   onClose: () => void;
+  onEdit: (outfit: Outfit) => void;
+  onDelete: (outfit: Outfit) => Promise<void>;
 }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [error, setError] = useState("");
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     setIsReady(false);
     setError("");
+    setConfirmDelete(false);
   }, [outfit]);
 
   const handleReady = useCallback(() => setIsReady(true), []);
@@ -268,6 +285,22 @@ export function OutfitDialog({
       setError("No pudimos descargar la imagen. Inténtalo de nuevo.");
     } finally {
       setIsDownloading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!outfit || isDeleting) return;
+    setIsDeleting(true);
+    setError("");
+    try {
+      await onDelete(outfit);
+      setConfirmDelete(false);
+      onClose();
+    } catch {
+      setError("No se pudo eliminar el outfit. Inténtalo de nuevo.");
+      setConfirmDelete(false);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -319,6 +352,24 @@ export function OutfitDialog({
 
               <div className="mt-8 lg:mt-auto lg:pt-8">
                 {error && <p className="mb-3 text-sm text-destructive">{error}</p>}
+                <div className="mb-3 grid grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => onEdit(outfit)}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full border bg-card px-3 text-sm font-medium text-foreground transition hover:bg-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Pencil className="h-4 w-4" />
+                    Editar outfit
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmDelete(true)}
+                    className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-3 text-sm font-medium text-destructive transition hover:bg-destructive/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                    Eliminar
+                  </button>
+                </div>
                 <PrimaryButton
                   onClick={handleDownload}
                   disabled={!isReady || isDownloading}
@@ -337,6 +388,27 @@ export function OutfitDialog({
               </div>
             </div>
           </div>
+          <AlertDialog open={confirmDelete} onOpenChange={setConfirmDelete}>
+            <AlertDialogContent className="rounded-2xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle>¿Eliminar {outfit.name}?</AlertDialogTitle>
+                <AlertDialogDescription>Esta combinación se eliminará de Mis outfits y no se puede deshacer.</AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel disabled={isDeleting}>Conservar outfit</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={(event) => {
+                    event.preventDefault();
+                    void handleDelete();
+                  }}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {isDeleting && <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />}
+                  Eliminar outfit
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </DialogContent>
       )}
     </Dialog>
