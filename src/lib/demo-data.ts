@@ -47,6 +47,22 @@ export const getOutfitGarments = (outfit: Outfit, collection: Garment[] = garmen
     return garment ? [garment] : [];
   });
 
+export function filterGarments(
+  collection: Garment[],
+  filters: { query: string; category: string | null; color: string | null; season: string | null },
+) {
+  const normalize = (value: string) =>
+    value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es").trim();
+  const query = normalize(filters.query);
+
+  return collection.filter((garment) =>
+    (!query || normalize(garment.name).includes(query)) &&
+    (!filters.category || garment.category === filters.category) &&
+    (!filters.color || garment.color === filters.color) &&
+    (!filters.season || garment.season === filters.season),
+  );
+}
+
 export const categories = ["Todas", "Superiores", "Inferiores", "Abrigos", "Vestidos", "Calzado"];
 export const colors = ["Todos", "Blanco", "Azul", "Beige", "Negro", "Verde"];
 export const seasons = ["Todas", "Primavera", "Otoño", "Invierno", "Todo el año"];

@@ -97,34 +97,60 @@ export function OutfitCard({
   );
 }
 
-export function SearchBar({ placeholder }: { placeholder: string }) {
+export function SearchBar({
+  placeholder,
+  value,
+  onChange,
+}: {
+  placeholder: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <label className="flex min-h-11 flex-1 items-center gap-3 rounded-full border bg-card px-4 shadow-soft focus-within:ring-2 focus-within:ring-ring">
       <Search className="h-4 w-4 text-muted-foreground" />
       <input
         type="search"
+        value={value}
+        onChange={(event) => onChange(event.currentTarget.value)}
         placeholder={placeholder}
+        aria-label={placeholder}
         className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
       />
     </label>
   );
 }
 
-export function FilterChips({ label, options }: { label: string; options: string[] }) {
+export function FilterChips({
+  label,
+  options,
+  selected,
+  onChange,
+}: {
+  label: string;
+  options: string[];
+  selected: string;
+  onChange: (value: string) => void;
+}) {
   return (
-    <div className="flex items-center gap-2 overflow-x-auto pb-1">
+    <div className="flex items-center gap-2 overflow-x-auto pb-1" role="group" aria-label={`Filtrar por ${label}`}>
       <span className="shrink-0 text-xs uppercase tracking-wider text-muted-foreground">{label}</span>
-      {options.map((o, i) => (
+      {options.map((option) => {
+        const isSelected = selected === option;
+        return (
         <button
-          key={o}
+          key={option}
           type="button"
+          aria-pressed={isSelected}
+          onClick={() => onChange(option)}
           className={`shrink-0 rounded-full border px-3.5 py-1.5 text-xs transition ${
-            i === 0 ? "border-primary bg-primary text-primary-foreground" : "bg-card text-foreground hover:border-sage"
+            isSelected ? "border-primary bg-primary text-primary-foreground" : "bg-card text-foreground hover:border-sage"
           }`}
         >
-          {o}
+          {option}
         </button>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -150,7 +176,7 @@ export const EmptyOutfits = () => (
   <EmptyState icon={Sparkles} title="Aún no hay outfits" message="Combina tus prendas favoritas y guarda tu primer look."
     action={<PrimaryButton><Plus className="h-4 w-4" />Crear outfit</PrimaryButton>} />
 );
-export const EmptySearch = () => (
+export const EmptySearch = ({ onClear }: { onClear?: () => void }) => (
   <EmptyState icon={SearchX} title="Sin resultados" message="No encontramos prendas con esos filtros. Prueba con otra búsqueda."
-    action={<PrimaryButton>Limpiar filtros</PrimaryButton>} />
+    action={<PrimaryButton onClick={onClear}>Limpiar filtros</PrimaryButton>} />
 );
