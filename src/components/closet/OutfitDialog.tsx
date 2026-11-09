@@ -60,7 +60,10 @@ async function drawOutfit(canvas: HTMLCanvasElement, outfit: Outfit, garments: G
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Canvas no disponible");
 
-  const items = outfit.garmentIds.map((id) => getGarment(id, garments));
+  const items = outfit.garmentIds.flatMap((id) => {
+    const garment = getGarment(id, garments);
+    return garment ? [garment] : [];
+  });
   const images = new Map<string, HTMLImageElement>();
   await Promise.all(
     items.map(async (item) => {
@@ -300,7 +303,10 @@ export function OutfitDialog({
             <div className="flex flex-col p-6 sm:p-8">
               <h3 className="text-xl">Prendas del outfit</h3>
               <ul className="mt-5 space-y-4">
-                {outfit.garmentIds.map((id) => getGarment(id, garments)).map((garment) => (
+                {outfit.garmentIds.flatMap((id) => {
+                  const garment = getGarment(id, garments);
+                  return garment ? [garment] : [];
+                }).map((garment) => (
                   <li key={garment.id} className="flex items-center gap-3">
                     <img
                       src={garment.image}

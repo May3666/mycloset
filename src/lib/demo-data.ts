@@ -39,7 +39,7 @@ export const outfits: Outfit[] = [
 ];
 
 export const getGarment = (id: string, collection: Garment[] = garments) =>
-  collection.find((garment) => garment.id === id)!;
+  collection.find((garment) => garment.id === id);
 
 export const categories = ["Todas", "Superiores", "Inferiores", "Abrigos", "Vestidos", "Calzado"];
 export const colors = ["Todos", "Blanco", "Azul", "Beige", "Negro", "Verde"];

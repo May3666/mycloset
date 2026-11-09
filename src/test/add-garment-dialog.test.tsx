@@ -1,7 +1,8 @@
 import { act, fireEvent, render, screen, waitFor } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import { AddGarmentDialog } from "@/components/closet/AddGarmentDialog";
+import { AddGarmentDialog, EditGarmentDialog } from "@/components/closet/AddGarmentDialog";
+import { garments } from "@/lib/demo-data";
 import { GarmentStoreProvider } from "@/lib/garment-store";
 
 function openDialog() {
@@ -23,6 +24,38 @@ describe("Add garment dialog", () => {
     expect(screen.getByLabelText("Categoría")).toBeRequired();
     expect(screen.getByLabelText("Color (opcional)")).not.toBeRequired();
     expect(screen.getByLabelText("Temporada (opcional)")).not.toBeRequired();
+  });
+
+  it("opens a garment in edit mode with its current fields", () => {
+    const garment = garments[0];
+    render(
+      <GarmentStoreProvider>
+        <EditGarmentDialog garment={garment} open onOpenChange={vi.fn()} />
+      </GarmentStoreProvider>,
+    );
+
+    expect(screen.getByRole("heading", { name: "Editar prenda" })).toBeInTheDocument();
+    expect(screen.getByLabelText("Nombre")).toHaveValue(garment.name);
+    expect(screen.getByLabelText("Categoría")).toHaveValue(garment.category);
+    expect(screen.getByRole("button", { name: "Eliminar prenda" })).toBeInTheDocument();
+  });
+
+  it("asks for confirmation before deleting a garment", () => {
+    render(
+      <GarmentStoreProvider>
+        <EditGarmentDialog
+          garment={garments[0]}
+          open
+          onOpenChange={vi.fn()}
+        />
+      </GarmentStoreProvider>,
+    );
+    fireEvent.click(screen.getByRole("button", { name: "Eliminar prenda" }));
+
+    expect(screen.getByRole("alertdialog")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: `¿Eliminar ${garments[0].name}?` })).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "Cancelar" }));
+    expect(screen.queryByRole("alertdialog")).not.toBeInTheDocument();
   });
 
   it("shows a preview of the selected garment image", async () => {

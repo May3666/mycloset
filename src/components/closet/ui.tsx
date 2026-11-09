@@ -1,4 +1,4 @@
-import { ArrowUpRight, MoreHorizontal, Search, Shirt, Sparkles, SearchX, Plus, type LucideIcon } from "lucide-react";
+import { ArrowUpRight, Search, Shirt, Sparkles, SearchX, Plus, type LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
 import { getGarment, type Garment, type Outfit } from "@/lib/demo-data";
 
@@ -14,18 +14,6 @@ export function PrimaryButton({ children, className = "", ...props }: ButtonHTML
   );
 }
 
-export function OptionsButton({ label }: { label: string }) {
-  return (
-    <button
-      type="button"
-      aria-label={`Opciones de ${label}`}
-      className="rounded-full p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-    >
-      <MoreHorizontal className="h-4 w-4" />
-    </button>
-  );
-}
-
 export function DemoBadge() {
   return (
     <span className="inline-flex items-center rounded-full bg-sage-soft px-3 py-1 text-xs font-medium text-primary">
@@ -34,9 +22,9 @@ export function DemoBadge() {
   );
 }
 
-export function GarmentCard({ garment }: { garment: Garment }) {
-  return (
-    <article className="group overflow-hidden rounded-2xl bg-card shadow-soft transition hover:shadow-lift">
+export function GarmentCard({ garment, onClick }: { garment: Garment; onClick?: () => void }) {
+  const content = (
+    <>
       <div className="aspect-[4/5] overflow-hidden bg-secondary">
         <img
           src={garment.image}
@@ -47,15 +35,27 @@ export function GarmentCard({ garment }: { garment: Garment }) {
           className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]"
         />
       </div>
-      <div className="flex items-start justify-between gap-2 p-4">
-        <div>
-          <h3 className="font-sans text-sm font-medium text-foreground">{garment.name}</h3>
-          <p className="mt-1 text-xs text-muted-foreground">
-            {garment.category}{garment.color ? ` · ${garment.color}` : ""}
-          </p>
-        </div>
-        <OptionsButton label={garment.name} />
+      <div className="p-4">
+        <h3 className="font-sans text-sm font-medium text-foreground">{garment.name}</h3>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {garment.category}{garment.color ? ` · ${garment.color}` : ""}
+        </p>
       </div>
+    </>
+  );
+
+  return (
+    <article className="group overflow-hidden rounded-2xl bg-card shadow-soft transition hover:shadow-lift">
+      {onClick ? (
+        <button
+          type="button"
+          onClick={onClick}
+          aria-label={`Editar ${garment.name}`}
+          className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        >
+          {content}
+        </button>
+      ) : <div>{content}</div>}
     </article>
   );
 }
@@ -69,7 +69,10 @@ export function OutfitCard({
   garments: Garment[];
   onClick: () => void;
 }) {
-  const items = outfit.garmentIds.map((id) => getGarment(id, garments));
+  const items = outfit.garmentIds.flatMap((id) => {
+    const garment = getGarment(id, garments);
+    return garment ? [garment] : [];
+  });
   const cells = items.slice(0, 4);
   return (
     <article className="overflow-hidden rounded-2xl bg-card p-3 shadow-soft transition hover:shadow-lift">
