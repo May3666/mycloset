@@ -1,6 +1,7 @@
 import { ArrowUpRight, Search, Shirt, Sparkles, SearchX, Plus, type LucideIcon } from "lucide-react";
 import type { ButtonHTMLAttributes, ReactNode } from "react";
-import { getGarment, type Garment, type Outfit } from "@/lib/demo-data";
+import { EditGarmentDialog } from "@/components/closet/EditGarmentDialog";
+import { getOutfitGarments, type Garment, type Outfit } from "@/lib/demo-data";
 
 export function PrimaryButton({ children, className = "", ...props }: ButtonHTMLAttributes<HTMLButtonElement>) {
   return (
@@ -22,41 +23,35 @@ export function DemoBadge() {
   );
 }
 
-export function GarmentCard({ garment, onClick }: { garment: Garment; onClick?: () => void }) {
-  const content = (
-    <>
-      <div className="aspect-[4/5] overflow-hidden bg-secondary">
-        <img
-          src={garment.image}
-          alt={garment.name}
-          loading="lazy"
-          width={768}
-          height={960}
-          className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]"
-        />
-      </div>
-      <div className="p-4">
-        <h3 className="font-sans text-sm font-medium text-foreground">{garment.name}</h3>
-        <p className="mt-1 text-xs text-muted-foreground">
-          {garment.category}{garment.color ? ` · ${garment.color}` : ""}
-        </p>
-      </div>
-    </>
-  );
-
+export function GarmentCard({ garment }: { garment: Garment }) {
   return (
-    <article className="group overflow-hidden rounded-2xl bg-card shadow-soft transition hover:shadow-lift">
-      {onClick ? (
+    <EditGarmentDialog
+      garment={garment}
+      trigger={
         <button
           type="button"
-          onClick={onClick}
           aria-label={`Editar ${garment.name}`}
-          className="block w-full text-left focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          className="group block w-full overflow-hidden rounded-2xl bg-card text-left shadow-soft transition hover:shadow-lift focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          {content}
+          <div className="aspect-[4/5] overflow-hidden bg-secondary">
+            <img
+              src={garment.image}
+              alt={garment.name}
+              loading="lazy"
+              width={768}
+              height={960}
+              className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]"
+            />
+          </div>
+          <div className="p-4">
+            <h3 className="font-sans text-sm font-medium text-foreground">{garment.name}</h3>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {garment.category}{garment.color ? ` · ${garment.color}` : ""}
+            </p>
+          </div>
         </button>
-      ) : <div>{content}</div>}
-    </article>
+      }
+    />
   );
 }
 
@@ -69,10 +64,7 @@ export function OutfitCard({
   garments: Garment[];
   onClick: () => void;
 }) {
-  const items = outfit.garmentIds.flatMap((id) => {
-    const garment = getGarment(id, garments);
-    return garment ? [garment] : [];
-  });
+  const items = getOutfitGarments(outfit, garments);
   const cells = items.slice(0, 4);
   return (
     <article className="overflow-hidden rounded-2xl bg-card p-3 shadow-soft transition hover:shadow-lift">

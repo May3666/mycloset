@@ -9,7 +9,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { getGarment, type Garment, type Outfit } from "@/lib/demo-data";
+import { getOutfitGarments, type Garment, type Outfit } from "@/lib/demo-data";
 
 const CANVAS_WIDTH = 1200;
 const CANVAS_HEIGHT = 1500;
@@ -60,10 +60,7 @@ async function drawOutfit(canvas: HTMLCanvasElement, outfit: Outfit, garments: G
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Canvas no disponible");
 
-  const items = outfit.garmentIds.flatMap((id) => {
-    const garment = getGarment(id, garments);
-    return garment ? [garment] : [];
-  });
+  const items = getOutfitGarments(outfit, garments);
   const images = new Map<string, HTMLImageElement>();
   await Promise.all(
     items.map(async (item) => {
@@ -303,10 +300,7 @@ export function OutfitDialog({
             <div className="flex flex-col p-6 sm:p-8">
               <h3 className="text-xl">Prendas del outfit</h3>
               <ul className="mt-5 space-y-4">
-                {outfit.garmentIds.flatMap((id) => {
-                  const garment = getGarment(id, garments);
-                  return garment ? [garment] : [];
-                }).map((garment) => (
+                {getOutfitGarments(outfit, garments).map((garment) => (
                   <li key={garment.id} className="flex items-center gap-3">
                     <img
                       src={garment.image}

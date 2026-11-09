@@ -103,7 +103,7 @@ function GarmentDialog({
       const body = new FormData();
       body.append("file", file);
       const endpoint =
-        import.meta.env.VITE_BACKGROUND_REMOVAL_API_URL || "http://localhost:7000/api/remove-background";
+        import.meta.env["VITE_BACKGROUND_REMOVAL_API_URL"] || "http://localhost:7000/api/remove-background";
       const response = await fetch(endpoint, { method: "POST", body, signal: controller.signal });
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { detail?: string } | null;
@@ -150,6 +150,7 @@ function GarmentDialog({
 
     const formData = new FormData(event.currentTarget);
     const category = String(formData.get("category"));
+    const brand = String(formData.get("brand") || "").trim();
     const fileName = sourceImage?.name.replace(/\.[^.]+$/, "").replace(/[-_]+/g, " ").trim();
     const enteredName = String(formData.get("name") || "").trim();
     const name = enteredName || fileName?.replace(/(^|\s)\S/g, (letter) => letter.toLocaleUpperCase("es")) || category;
@@ -162,9 +163,10 @@ function GarmentDialog({
         category,
         color: String(formData.get("color") || ""),
         season: String(formData.get("season") || ""),
-        brand: String(formData.get("brand") || "").trim() || undefined,
+        ...(brand ? { brand } : {}),
       };
-      if (garment) await updateGarment(details, processedImage ?? undefined);
+      const { id, ...updates } = details;
+      if (garment) await updateGarment(id, updates, processedImage ?? undefined);
       else if (processedImage) await addGarment(details, processedImage);
       handleOpenChange(false);
     } catch {

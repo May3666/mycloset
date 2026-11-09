@@ -41,6 +41,12 @@ export const outfits: Outfit[] = [
 export const getGarment = (id: string, collection: Garment[] = garments) =>
   collection.find((garment) => garment.id === id);
 
+export const getOutfitGarments = (outfit: Outfit, collection: Garment[] = garments) =>
+  outfit.garmentIds.flatMap((id) => {
+    const garment = collection.find((item) => item.id === id);
+    return garment ? [garment] : [];
+  });
+
 export const categories = ["Todas", "Superiores", "Inferiores", "Abrigos", "Vestidos", "Calzado"];
 export const colors = ["Todos", "Blanco", "Azul", "Beige", "Negro", "Verde"];
 export const seasons = ["Todas", "Primavera", "Otoño", "Invierno", "Todo el año"];
