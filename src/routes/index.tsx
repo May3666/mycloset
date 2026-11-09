@@ -3,7 +3,7 @@ import { ArrowRight, Plus, Sparkles } from "lucide-react";
 import { AddGarmentDialog } from "@/components/closet/AddGarmentDialog";
 import { AppShell } from "@/components/closet/AppShell";
 import { DemoBadge, GarmentCard } from "@/components/closet/ui";
-import { garments } from "@/lib/demo-data";
+import { useGarments } from "@/lib/garment-store";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,6 +18,8 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
+  const { garments } = useGarments();
+
   return (
     <AppShell>
       <section className="mb-10">

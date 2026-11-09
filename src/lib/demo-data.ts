@@ -13,6 +13,7 @@ export type Garment = {
   color: string;
   season: string;
   image: string;
+  brand?: string;
 };
 
 export type Outfit = {
@@ -37,7 +38,8 @@ export const outfits: Outfit[] = [
   { id: "o3", name: "Outfit para salir", occasion: "Noche", garmentIds: ["g4", "g3", "g5"] },
 ];
 
-export const getGarment = (id: string) => garments.find((g) => g.id === id)!;
+export const getGarment = (id: string, collection: Garment[] = garments) =>
+  collection.find((garment) => garment.id === id)!;
 
 export const categories = ["Todas", "Superiores", "Inferiores", "Abrigos", "Vestidos", "Calzado"];
 export const colors = ["Todos", "Blanco", "Azul", "Beige", "Negro", "Verde"];

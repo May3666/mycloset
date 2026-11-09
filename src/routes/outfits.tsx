@@ -5,6 +5,7 @@ import { AppShell, PageHeader } from "@/components/closet/AppShell";
 import { OutfitDialog } from "@/components/closet/OutfitDialog";
 import { DemoBadge, EmptyOutfits, OutfitCard, PrimaryButton } from "@/components/closet/ui";
 import { outfits, type Outfit } from "@/lib/demo-data";
+import { useGarments } from "@/lib/garment-store";
 
 export const Route = createFileRoute("/outfits")({
   head: () => ({
@@ -20,6 +21,7 @@ export const Route = createFileRoute("/outfits")({
 
 function Outfits() {
   const [selectedOutfit, setSelectedOutfit] = useState<Outfit | null>(null);
+  const { garments } = useGarments();
 
   return (
     <AppShell>
@@ -31,7 +33,7 @@ function Outfits() {
       <div className="mb-4"><DemoBadge /></div>
       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
         {outfits.map((o) => (
-          <OutfitCard key={o.id} outfit={o} onClick={() => setSelectedOutfit(o)} />
+          <OutfitCard key={o.id} outfit={o} garments={garments} onClick={() => setSelectedOutfit(o)} />
         ))}
       </div>
 
@@ -39,7 +41,7 @@ function Outfits() {
         <h2 className="mb-5 text-xl text-muted-foreground">Vista previa de estado vacío</h2>
         <EmptyOutfits />
       </section>
-      <OutfitDialog outfit={selectedOutfit} onClose={() => setSelectedOutfit(null)} />
+      <OutfitDialog outfit={selectedOutfit} garments={garments} onClose={() => setSelectedOutfit(null)} />
     </AppShell>
   );
 }

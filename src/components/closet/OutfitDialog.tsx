@@ -33,7 +33,6 @@ function drawGarment(
   context: CanvasRenderingContext2D,
   image: HTMLImageElement,
   rectangle: Rectangle,
-  cardColor: string,
 ) {
   const { x, y, width, height } = rectangle;
   const padding = 14;
@@ -47,8 +46,6 @@ function drawGarment(
   context.beginPath();
   context.roundRect(x, y, width, height, 44);
   context.clip();
-  context.fillStyle = cardColor;
-  context.fillRect(x, y, width, height);
   context.drawImage(
     image,
     x + (width - imageWidth) / 2,
@@ -59,11 +56,11 @@ function drawGarment(
   context.restore();
 }
 
-async function drawOutfit(canvas: HTMLCanvasElement, outfit: Outfit) {
+async function drawOutfit(canvas: HTMLCanvasElement, outfit: Outfit, garments: Garment[]) {
   const context = canvas.getContext("2d");
   if (!context) throw new Error("Canvas no disponible");
 
-  const items = outfit.garmentIds.map(getGarment);
+  const items = outfit.garmentIds.map((id) => getGarment(id, garments));
   const images = new Map<string, HTMLImageElement>();
   await Promise.all(
     items.map(async (item) => {
@@ -73,7 +70,6 @@ async function drawOutfit(canvas: HTMLCanvasElement, outfit: Outfit) {
   await document.fonts.ready;
 
   const background = themeColor("--secondary");
-  const card = themeColor("--card");
   const foreground = themeColor("--foreground");
   const muted = themeColor("--muted-foreground");
   const sageSoft = themeColor("--sage-soft");
@@ -109,7 +105,7 @@ async function drawOutfit(canvas: HTMLCanvasElement, outfit: Outfit) {
 
   const outerwearImage = imageFor(outerwear);
   if (outerwearImage) {
-    drawGarment(context, outerwearImage, { x: 90, y: 390, width: 460, height: 400 }, card);
+    drawGarment(context, outerwearImage, { x: 90, y: 390, width: 460, height: 400 });
   }
 
   const topImage = imageFor(top);
@@ -120,7 +116,6 @@ async function drawOutfit(canvas: HTMLCanvasElement, outfit: Outfit) {
       outerwear
         ? { x: 650, y: 400, width: 460, height: 360 }
         : { x: 270, y: 360, width: 660, height: 420 },
-      card,
     );
   }
 
@@ -132,7 +127,6 @@ async function drawOutfit(canvas: HTMLCanvasElement, outfit: Outfit) {
       outerwear
         ? { x: 620, y: 350, width: 490, height: 790 }
         : { x: 260, y: 350, width: 680, height: 790 },
-      card,
     );
   }
 
@@ -144,13 +138,12 @@ async function drawOutfit(canvas: HTMLCanvasElement, outfit: Outfit) {
       outerwear
         ? { x: 320, y: 800, width: 560, height: 370 }
         : { x: 320, y: 770, width: 560, height: 400 },
-      card,
     );
   }
 
   const shoesImage = imageFor(shoes);
   if (shoesImage) {
-    drawGarment(context, shoesImage, { x: 290, y: 1190, width: 620, height: 210 }, card);
+    drawGarment(context, shoesImage, { x: 290, y: 1190, width: 620, height: 210 });
   }
 
   context.fillStyle = muted;
@@ -172,6 +165,7 @@ function downloadFileName(outfitName: string) {
 
 function OutfitCanvas({
   outfit,
+  garments,
   canvasRef,
   isReady,
   hasError,
@@ -179,6 +173,7 @@ function OutfitCanvas({
   onError,
 }: {
   outfit: Outfit;
+  garments: Garment[];
   canvasRef: RefObject<HTMLCanvasElement | null>;
   isReady: boolean;
   hasError: boolean;
@@ -190,7 +185,7 @@ function OutfitCanvas({
     if (!canvas) return;
     let cancelled = false;
 
-    drawOutfit(canvas, outfit)
+    drawOutfit(canvas, outfit, garments)
       .then(() => {
         if (!cancelled) onReady();
       })
@@ -201,7 +196,7 @@ function OutfitCanvas({
     return () => {
       cancelled = true;
     };
-  }, [canvasRef, outfit, onReady, onError]);
+  }, [canvasRef, outfit, garments, onReady, onError]);
 
   return (
     <>
@@ -223,7 +218,15 @@ function OutfitCanvas({
   );
 }
 
-export function OutfitDialog({ outfit, onClose }: { outfit: Outfit | null; onClose: () => void }) {
+export function OutfitDialog({
+  outfit,
+  garments,
+  onClose,
+}: {
+  outfit: Outfit | null;
+  garments: Garment[];
+  onClose: () => void;
+}) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
@@ -246,7 +249,7 @@ export function OutfitDialog({ outfit, onClose }: { outfit: Outfit | null; onClo
     setError("");
 
     try {
-      await drawOutfit(canvasRef.current, outfit);
+      await drawOutfit(canvasRef.current, outfit, garments);
       const blob = await new Promise<Blob>((resolve, reject) => {
         canvasRef.current?.toBlob((result) => {
           if (result) resolve(result);
@@ -284,6 +287,7 @@ export function OutfitDialog({ outfit, onClose }: { outfit: Outfit | null; onClo
               <div className="relative mx-auto w-full max-w-[400px] lg:max-w-[380px]">
                 <OutfitCanvas
                   outfit={outfit}
+                  garments={garments}
                   canvasRef={canvasRef}
                   isReady={isReady}
                   hasError={Boolean(error)}
@@ -296,17 +300,17 @@ export function OutfitDialog({ outfit, onClose }: { outfit: Outfit | null; onClo
             <div className="flex flex-col p-6 sm:p-8">
               <h3 className="text-xl">Prendas del outfit</h3>
               <ul className="mt-5 space-y-4">
-                {outfit.garmentIds.map(getGarment).map((garment) => (
+                {outfit.garmentIds.map((id) => getGarment(id, garments)).map((garment) => (
                   <li key={garment.id} className="flex items-center gap-3">
                     <img
                       src={garment.image}
                       alt=""
-                      className="h-14 w-14 shrink-0 rounded-xl bg-secondary object-cover"
+                      className="h-14 w-14 shrink-0 rounded-xl bg-secondary object-contain"
                     />
                     <div>
                       <p className="text-sm font-medium text-foreground">{garment.name}</p>
                       <p className="mt-0.5 text-xs text-muted-foreground">
-                        {garment.category} · {garment.color}
+                        {garment.category}{garment.color ? ` · ${garment.color}` : ""}
                       </p>
                     </div>
                   </li>

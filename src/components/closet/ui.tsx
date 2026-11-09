@@ -44,14 +44,14 @@ export function GarmentCard({ garment }: { garment: Garment }) {
           loading="lazy"
           width={768}
           height={960}
-          className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+          className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]"
         />
       </div>
       <div className="flex items-start justify-between gap-2 p-4">
         <div>
           <h3 className="font-sans text-sm font-medium text-foreground">{garment.name}</h3>
           <p className="mt-1 text-xs text-muted-foreground">
-            {garment.category} · {garment.color}
+            {garment.category}{garment.color ? ` · ${garment.color}` : ""}
           </p>
         </div>
         <OptionsButton label={garment.name} />
@@ -60,8 +60,16 @@ export function GarmentCard({ garment }: { garment: Garment }) {
   );
 }
 
-export function OutfitCard({ outfit, onClick }: { outfit: Outfit; onClick: () => void }) {
-  const items = outfit.garmentIds.map(getGarment);
+export function OutfitCard({
+  outfit,
+  garments,
+  onClick,
+}: {
+  outfit: Outfit;
+  garments: Garment[];
+  onClick: () => void;
+}) {
+  const items = outfit.garmentIds.map((id) => getGarment(id, garments));
   const cells = items.slice(0, 4);
   return (
     <article className="overflow-hidden rounded-2xl bg-card p-3 shadow-soft transition hover:shadow-lift">
@@ -81,7 +89,7 @@ export function OutfitCard({ outfit, onClick }: { outfit: Outfit; onClick: () =>
                 src={g.image}
                 alt={g.name}
                 loading="lazy"
-                className="h-full w-full object-cover transition duration-500 group-hover:scale-[1.03]"
+                className="h-full w-full object-contain transition duration-500 group-hover:scale-[1.03]"
               />
             </div>
           ))}

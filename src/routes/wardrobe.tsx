@@ -3,7 +3,8 @@ import { Plus } from "lucide-react";
 import { AddGarmentDialog } from "@/components/closet/AddGarmentDialog";
 import { AppShell, PageHeader } from "@/components/closet/AppShell";
 import { DemoBadge, EmptyGarments, EmptySearch, FilterChips, GarmentCard, PrimaryButton, SearchBar } from "@/components/closet/ui";
-import { categories, colors, garments, seasons } from "@/lib/demo-data";
+import { categories, colors, seasons } from "@/lib/demo-data";
+import { useGarments } from "@/lib/garment-store";
 
 export const Route = createFileRoute("/wardrobe")({
   head: () => ({
@@ -18,6 +19,8 @@ export const Route = createFileRoute("/wardrobe")({
 });
 
 function Wardrobe() {
+  const { garments } = useGarments();
+
   return (
     <AppShell>
       <PageHeader
