@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as OutfitsRouteImport } from './routes/outfits'
 import { Route as WardrobeRouteImport } from './routes/wardrobe'
+import { Route as ApiRemoveBackgroundRouteImport } from './routes/api.remove-background'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,35 +29,44 @@ const WardrobeRoute = WardrobeRouteImport.update({
   path: '/wardrobe',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiRemoveBackgroundRoute = ApiRemoveBackgroundRouteImport.update({
+  id: '/api/remove-background',
+  path: '/api/remove-background',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/outfits': typeof OutfitsRoute
   '/wardrobe': typeof WardrobeRoute
+  '/api/remove-background': typeof ApiRemoveBackgroundRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/outfits': typeof OutfitsRoute
   '/wardrobe': typeof WardrobeRoute
+  '/api/remove-background': typeof ApiRemoveBackgroundRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/outfits': typeof OutfitsRoute
   '/wardrobe': typeof WardrobeRoute
+  '/api/remove-background': typeof ApiRemoveBackgroundRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/outfits' | '/wardrobe'
+  fullPaths: '/' | '/outfits' | '/wardrobe' | '/api/remove-background'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/outfits' | '/wardrobe'
-  id: '__root__' | '/' | '/outfits' | '/wardrobe'
+  to: '/' | '/outfits' | '/wardrobe' | '/api/remove-background'
+  id: '__root__' | '/' | '/outfits' | '/wardrobe' | '/api/remove-background'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   OutfitsRoute: typeof OutfitsRoute
   WardrobeRoute: typeof WardrobeRoute
+  ApiRemoveBackgroundRoute: typeof ApiRemoveBackgroundRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -82,6 +92,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WardrobeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/remove-background': {
+      id: '/api/remove-background'
+      path: '/api/remove-background'
+      fullPath: '/api/remove-background'
+      preLoaderRoute: typeof ApiRemoveBackgroundRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -89,6 +106,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   OutfitsRoute: OutfitsRoute,
   WardrobeRoute: WardrobeRoute,
+  ApiRemoveBackgroundRoute: ApiRemoveBackgroundRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

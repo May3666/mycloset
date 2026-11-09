@@ -102,9 +102,11 @@ function GarmentDialog({
     try {
       const body = new FormData();
       body.append("file", file);
-      const endpoint =
-        import.meta.env["VITE_BACKGROUND_REMOVAL_API_URL"] || "http://localhost:7000/api/remove-background";
-      const response = await fetch(endpoint, { method: "POST", body, signal: controller.signal });
+      const response = await fetch("/api/remove-background", {
+        method: "POST",
+        body,
+        signal: controller.signal,
+      });
       if (!response.ok) {
         const payload = (await response.json().catch(() => null)) as { detail?: string } | null;
         throw new Error(payload?.detail || "No pudimos eliminar el fondo de la imagen.");

@@ -14,19 +14,24 @@ La interfaz inicial fue diseñada con Lovable AI y después ampliada para inclui
 
 ## Ejecutar en local
 
-Requisitos: Node.js con npm y Docker Desktop.
+Requisitos: Node.js con npm y Vercel CLI.
 
 ```sh
 npm install
-docker compose -f background-removal/compose.yaml up --build
-npm run dev
+npx vercel dev -L
 ```
 
-La app usa el primer puerto disponible a partir del 8080 y el servicio de procesamiento escucha en `http://localhost:7000`. Si Vite selecciona un puerto distinto a los incluidos en `ALLOWED_ORIGINS`, agrega ese origen a la variable del servicio para permitir la petición CORS. Para una URL de backend distinta, define `VITE_BACKGROUND_REMOVAL_API_URL` antes de iniciar o compilar el frontend.
+Vercel CLI ejecuta ambos servicios e inyecta el binding `BACKGROUND_REMOVAL_URL` en la app. Para ejecutar la app con Vite y el backend Docker por separado, inicia `docker compose -f background-removal/compose.yaml up --build` y `npm run dev` en terminales distintas.
+
+## Despliegue en Vercel
+
+El archivo `vercel.json` define dos servicios para un mismo proyecto: `app` sirve la interfaz y recibe todo el tráfico público; `background-removal` ejecuta FastAPI y permanece interno. La app declara el binding `BACKGROUND_REMOVAL_URL` hacia el backend. El navegador envía las fotos a `/api/remove-background` en la app, y su handler de servidor reenvía la petición al servicio interno. No es necesario configurar manualmente la variable del binding ni publicar el backend con una rewrite.
+
+Para probar la configuración de servicios localmente, usa `npx vercel dev -L` con Vercel CLI 48.1.8 o posterior. El backend descarga U²-Net (aprox. 176 MB) al iniciar y puede tener cold starts y consumo de memoria/CPU elevados en un entorno serverless; verifica estos límites con el plan y runtime elegidos antes de producción.
 
 En el primer inicio, el servicio descarga el modelo U²-Net (aprox. 176 MB) y lo conserva en un volumen Docker. El backend usa `rembg` (MIT) y los pesos de U²-Net (Apache-2.0). Es un modelo general, así que los resultados pueden variar con prendas de bajo contraste, oclusiones o sombras complejas.
 
-Las prendas y outfits se guardan en IndexedDB del navegador y no se sincronizan entre dispositivos. Las fotos se procesan con el servicio Python autohospedado, no con una API externa.
+Las prendas y outfits se guardan en IndexedDB del navegador y no se sincronizan entre dispositivos. Las fotos se envían desde el servidor de la app al servicio Python interno, no directamente desde el navegador ni a una API externa.
 
 ## Escalabilidad y próximos pasos
 
